@@ -72,7 +72,7 @@ function addExpenseToHistory(expense) {
     // Create a new expense item
     const expenseItem = document.createElement('div');
     expenseItem.className = 'p-4 mb-4 rounded-lg cursor-pointer transition-colors duration-300';
-    
+
     let sign = '';
     if (expense.paymentType === 'credit') {
         expenseItem.className += ' bg-green-100 hover:bg-green-200';
@@ -81,17 +81,17 @@ function addExpenseToHistory(expense) {
         expenseItem.className += ' bg-red-100 hover:bg-red-200';
         sign = '-';
     }
-    
+
     // Set inner HTML with basic info (name, amount, timestamp)
     const flexDiv = document.createElement('div');
-    flexDiv.className = 'expense-history';
+    flexDiv.className = 'expense-history flex justify-between items-center';
 
     const nameSpan = document.createElement('span');
-    nameSpan.className = 'font-semibold flex justify-between items-center';
+    nameSpan.className = 'font-semibold';
     nameSpan.textContent = expense.name;
 
     const amountSpan = document.createElement('span');
-    amountSpan.className = 'font-semibold flex justify-between items-center';
+    amountSpan.className = 'font-semibold';
     amountSpan.textContent = `${sign}${expense.amount} CAD`;
 
     flexDiv.appendChild(nameSpan);
@@ -101,8 +101,32 @@ function addExpenseToHistory(expense) {
     timestampSmall.className = 'text-gray-500';
     timestampSmall.textContent = expense.timestamp;
 
+    // Add a delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'text-red-600 hover:text-red-800 ml-4';
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', async function() {
+        try {
+            const response = await fetch(`/api/v1/expense/${expense._id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                expenseHistory.removeChild(expenseItem);
+                recalculateTotal(); // Update total after deletion
+            } else {
+                console.log('Failed to delete expense');
+                alert('Failed to delete expense. Please try again.');
+            }
+        } catch (error) {
+            console.log('Error:', error);
+            alert('Failed to delete expense. Please try again.');
+        }
+    });
+
     expenseItem.appendChild(flexDiv);
     expenseItem.appendChild(timestampSmall);
+    expenseItem.appendChild(deleteButton);
 
     // Add hover effect to show more details
     expenseItem.addEventListener('mouseover', function() {
